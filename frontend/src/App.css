@@ -1,0 +1,27 @@
+.dashboard {
+  padding: 30px;
+  background-color: #0f172a;
+  color: white;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.sensor-section {
+  margin-bottom: 40px;
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.chart-section {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+pre {
+  background: #334155;
+  padding: 15px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
