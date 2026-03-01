@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Environment & secrets
+*.json
+.env
+
+# ML models
+*.pkl
+
+# Datasets
+*.csv
+*.txt
+
+# OS
+.DS_Store
+
+
+
+node_modules/
+frontend/node_modules/
