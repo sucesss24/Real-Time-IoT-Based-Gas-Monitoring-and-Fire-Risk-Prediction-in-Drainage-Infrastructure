@@ -10,7 +10,7 @@ from email.message import EmailMessage
 # ==============================
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {
-    "databaseURL": "https://mq-135-a4442-default-rtdb.firebaseio.com/"
+    "databaseURL": ""
 })
 
 readings_ref = db.reference("readings")
@@ -154,4 +154,5 @@ Time: {datetime.now().strftime('%H:%M:%S')}
 
     except Exception as e:
         print("Error:", e)
+
         time.sleep(3)
