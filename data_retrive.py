@@ -5,9 +5,6 @@ from datetime import datetime
 import smtplib
 from email.message import EmailMessage
 
-# ==============================
-# Firebase Initialization
-# ==============================
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {
     "databaseURL": ""
@@ -18,9 +15,7 @@ prediction_ref = db.reference("prediction")
 
 print("Tunnel Fire & Toxic Gas Monitoring Started...\n")
 
-# ==============================
-# Email Configuration
-# ==============================
+
 SENDER_EMAIL = "miniproject2k26mail@gmail.com"
 SENDER_PASSWORD = "ldjo ivpa cdwb gpeb"
 
@@ -30,6 +25,7 @@ ADMIN_EMAILS = [
     "71762305062@cit.edu.in"
 ]
 
+# ==============================
 def send_bulk_alert(subject, body, recipients):
     try:
         msg = EmailMessage()
@@ -43,12 +39,10 @@ def send_bulk_alert(subject, body, recipients):
             smtp.send_message(msg)
 
         print("Email alert sent successfully!")
+
     except Exception as e:
         print("Email sending failed:", e)
 
-# ==============================
-# Fire Prediction
-# ==============================
 def predict_fire(mq2, mq135, mq7, temp, hum):
     score = (
         (mq2 / 1000) * 0.3 +
@@ -57,6 +51,7 @@ def predict_fire(mq2, mq135, mq7, temp, hum):
         (temp / 100) * 0.15 +
         (hum / 100) * 0.05
     )
+
     probability = round(min(score, 1.0), 2)
 
     if probability < 0.40:
@@ -66,11 +61,9 @@ def predict_fire(mq2, mq135, mq7, temp, hum):
     else:
         return "FIRE ALERT", probability
 
-# ==============================
-# Toxic Gas Detection
-# ==============================
 def toxic_level(mq2, mq135, mq7):
     gas_avg = (mq2 + mq135 + mq7) / 3
+
     if gas_avg < 200:
         return "SAFE", gas_avg
     elif gas_avg < 400:
@@ -80,9 +73,7 @@ def toxic_level(mq2, mq135, mq7):
     else:
         return "CRITICAL", gas_avg
 
-# ==============================
-# Main Monitoring Loop
-# ==============================
+
 while True:
     try:
         sensors_data = readings_ref.get()
@@ -95,6 +86,7 @@ while True:
         print("\n========== Tunnel Status ==========")
 
         for sensor_id, values in sensors_data.items():
+
             mq2 = values.get("mq2", 0)
             mq135 = values.get("mq135", 0)
             mq7 = values.get("mq7", 0)
@@ -104,14 +96,22 @@ while True:
             fire_status, probability = predict_fire(mq2, mq135, mq7, temp, hum)
             toxic_status, gas_avg = toxic_level(mq2, mq135, mq7)
 
-            print(f"{sensor_id}")
-            print(f"  Fire: {fire_status} ({probability})")
-            print(f"  Toxic: {toxic_status} ")
-            print(f"  Temp: {temp} °C, Humidity: {hum} %\n")
+            print(f"\nSensor ID : {sensor_id}")
+
+            print("  Sensor Readings:")
+            print(f"  MQ2 Gas Sensor     : {mq2}")
+            print(f"  MQ135 Air Sensor   : {mq135}")
+            print(f"  MQ7 CO Sensor      : {mq7}")
+            print(f"  Temperature        : {temp} °C")
+            print(f"  Humidity           : {hum} %")
+
+            print("\n  Prediction:")
+            print(f"  Fire Status        : {fire_status} ({probability})")
+            print(f"  Toxic Level        : {toxic_status}")
+            print("")
 
             current_alert = prediction_ref.child(sensor_id).child("alert_sent").get() or False
 
-            # Update Firebase
             prediction_ref.child(sensor_id).set({
                 "fire_status": fire_status,
                 "probability": probability,
@@ -123,33 +123,33 @@ while True:
                 "alert_sent": current_alert
             })
 
-            # ==============================
-            # Send Email Alert
-            # ==============================
-            if fire_status != "FIRE" or toxic_status not in ["HIGH", "CRITICAL"]:
+           
+            if fire_status == "SAFE" or toxic_status in ["MODERATE", "CRITICAL"]:
+
                 if not current_alert:
 
                     message_body = f"""
-TUNNEL ALERT: {sensor_id}
+TUNNEL ALERT : {sensor_id}
 
-Fire Status: {fire_status} ({probability})
-Toxic Level: {toxic_status} (Avg: {round(gas_avg,2)})
+Fire Status : {fire_status} ({probability})
+Toxic Level : {toxic_status} (Avg Gas : {round(gas_avg,2)})
 
-Temperature: {temp} °C
-Humidity: {hum} %
+Temperature : {temp} °C
+Humidity : {hum} %
 
-Time: {datetime.now().strftime('%H:%M:%S')}
+Time : {datetime.now().strftime('%H:%M:%S')}
 """
 
-                    send_bulk_alert("🚨 Tunnel Emergency Alert", message_body, ADMIN_EMAILS)
+                    send_bulk_alert(" Tunnel Emergency Alert", message_body, ADMIN_EMAILS)
 
                     prediction_ref.child(sensor_id).update({"alert_sent": True})
-                    print(f"DEBUG: Email Alert sent for {sensor_id}")
+
+                    print("  ALERT EMAIL SENT")
 
             else:
                 prediction_ref.child(sensor_id).update({"alert_sent": False})
 
-        print("====================================\n")
+        print("====================================")
         time.sleep(3)
 
     except Exception as e:
