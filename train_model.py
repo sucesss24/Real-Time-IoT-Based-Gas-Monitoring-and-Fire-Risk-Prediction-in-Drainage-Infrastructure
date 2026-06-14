@@ -7,8 +7,8 @@ import joblib
 
 # Step 1: Load dataset
 data = pd.read_csv("smoke_detection_iot.csv")
-print("✅ Dataset Loaded Successfully!")
-print(data.head())  # preview first 5 rows
+print("Dataset Loaded Successfully!")
+print(data.head()) 
 
 # Step 2: Select relevant features and target
 X = data[['Temperature[C]', 'Humidity[%]', 'CNT']]  # updated to match your dataset
@@ -23,10 +23,10 @@ model.fit(X_train, y_train)
 
 # Step 5: Predict and evaluate
 y_pred = model.predict(X_test)
-print("\n🎯 Accuracy:", accuracy_score(y_test, y_pred))
-print("\n📊 Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
-print("\n📈 Classification Report:\n", classification_report(y_test, y_pred))
+print("\nAccuracy:", accuracy_score(y_test, y_pred))
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
 
 # Step 6: Save the trained model
 joblib.dump(model, "fire_prediction_model.pkl")
-print("\n💾 Model saved as fire_prediction_model.pkl")
+print("\nModel saved as fire_prediction_model.pkl")
